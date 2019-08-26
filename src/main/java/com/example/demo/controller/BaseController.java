@@ -1,13 +1,20 @@
 package com.example.demo.controller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 
@@ -26,6 +33,8 @@ public class BaseController {
 		this.response=response;
 		this.session=request.getSession();
 	}
+
+
 	
 	/**
 	 * 获取项目的物理路径
@@ -34,6 +43,18 @@ public class BaseController {
 	protected String getRealPath() {
 		return session.getServletContext().getRealPath("/");
 	}
+
+
+    /**
+     * 返回当前时间  类型为sql.Timestamp 可直接插入数据库
+     * @return
+     */
+    protected Timestamp GetSqlTime(){
+
+	    return new java.sql.Timestamp(System.currentTimeMillis());
+    }
+
+
 	/**
 	 * 加密
 	 * @return
@@ -75,7 +96,7 @@ public class BaseController {
                     try {  
                         inet = InetAddress.getLocalHost();  
                     } catch (UnknownHostException e) {  
-                        return "网络错误" ;
+                        return "0.0.0.0" ;
                     }  
                     ipAddress= inet.getHostAddress();  
                 }  
@@ -106,12 +127,12 @@ public class BaseController {
 	 * @param strIP
 	 * @return
 	 */
-	/*protected String getIpDescr(String strIP){
+	protected String getIpDescr(String strIP){
         try
           {
-            URL url = new URL("http://ip.taobao.com/service/getIpInfo.php?ip=" + strIP); 
-            URLConnection conn = url.openConnection(); 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8")); 
+            URL url = new URL("http://ip.taobao.com/service/getIpInfo.php?ip=" + strIP);
+            URLConnection conn = url.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
             String line = null; 
             StringBuffer result = new StringBuffer(); 
             while((line = reader.readLine()) != null)
@@ -121,8 +142,8 @@ public class BaseController {
             reader.close();    
             String jsonResult=result.toString();
 
+			  JSONObject jsonObject = JSONObject.parseObject(jsonResult);
 
-            JSONobject jsonObject=JSONObject.fromObject(jsonResult);
             JSONObject jsonObject1=(JSONObject)jsonObject.get("data");
             String country = jsonObject1.get("country").toString();
             String area =jsonObject1.get("area").toString();
@@ -134,11 +155,11 @@ public class BaseController {
             return descr.toString();
           }
          catch( IOException e)
-          { 
-            return "网络异常!";
+          {
+            return "网络错误.未知";
           }
 
-    }*/
+    }
 	
 	
 	

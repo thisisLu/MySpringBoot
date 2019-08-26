@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int adduser(BUsers user) {
-        return userDao.insert(user);
+        return userDao.adduser(user);
     }
 
     /*
@@ -38,14 +38,31 @@ public class UserServiceImpl implements UserService {
         return result;
     }
 
+
+
+    @Override
+    public BUsers testredis(long uid) {
+        return userDao.testredis(uid);
+    }
+
+
+    /**
+     * 测试
+     * @return
+     */
+    @Override
+    public List<BUsers> selectUsers() {
+        return userDao.selectUsers();
+    }
+
     /**
      * 用户登录
      * @param user
-     * @return 返回用户id
+     * @return 返回用户列表
      */
-    public Integer User_id(BUsers user){
+    public BUsers User_login(BUsers user){
 
-        return userDao.User_id(user);
+        return userDao.User_login(user);
     }
 
     /**
@@ -55,8 +72,17 @@ public class UserServiceImpl implements UserService {
      * @return  存在返回当前ID
      */
     @Override
-    public Integer Name_Ip(String name, String ip) {
-        return userDao.Name_Ip(name, ip);
+    public Integer NameOrIPExists(String name, String ip) {
+
+        try{
+
+            return userDao.NameOrIPExists(name, ip);
+
+        }catch (Exception ex){
+
+            return 0;
+        }
+
     }
 
 

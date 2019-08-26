@@ -6,9 +6,10 @@ public class BUsers {
   private long uid;
   private String username;
   private String password;
-  private java.sql.Date jointime;
+  private java.sql.Timestamp jointime;
   private String iPsource;
   private long state;
+  private String iptity;
 
 
   public long getUid() {
@@ -38,11 +39,11 @@ public class BUsers {
   }
 
 
-  public java.sql.Date getJointime() {
+  public java.sql.Timestamp getJointime() {
     return jointime;
   }
 
-  public void setJointime(java.sql.Date jointime) {
+  public void setJointime(java.sql.Timestamp jointime) {
     this.jointime = jointime;
   }
 
@@ -62,6 +63,15 @@ public class BUsers {
 
   public void setState(long state) {
     this.state = state;
+  }
+
+
+  public String getIptity() {
+    return iptity;
+  }
+
+  public void setIptity(String iptity) {
+    this.iptity = iptity;
   }
 
 }

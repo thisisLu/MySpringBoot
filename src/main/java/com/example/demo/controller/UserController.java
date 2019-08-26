@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.JsonResponse.Response;
 import com.example.demo.Util.DesUtils;
 import com.example.demo.Util.RandomValidateCode;
 import com.example.demo.model.BUsers;
@@ -10,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 创建时间 2019-08-12 17：26
@@ -28,47 +30,65 @@ public class UserController extends BaseController{
     private UserService userService;
 
 
+
+
     /**
      * 用户注册接口
-     * @param user  包含实体类 Name password...
+     * @param user  参数包含 username password  不可为空
      * @param verify    验证码
-     * @return 成功插入返回 1 ，
+     * @return 200 注册成功
      */
-    @ResponseBody
     @PostMapping("/add")
-    public int addUser(BUsers user, String verify){
-
+    public Object addUser(BUsers user, String verify){
 
 
         try{
             //认证 验证码
             RandomValidateCode R = new RandomValidateCode();
             if(!verify.equalsIgnoreCase(session.getAttribute(R.RANDOMCODEKEY).toString())){
-                return -1;//验证码错误
-            }
-            //通过 Name OR IP 查找是否 存在当前用户名或IP地址
-            if(userService.Name_Ip(user.getUsername(),getIpAddr(request))!=null){
-                return 4;
-            }
 
-            //加密密码 变成密文存进数据库
-            try {
 
+                return Response.build(Response.ResponseCode.ERROR,"验证码错误");//验证码错误
+            }
+            //通过 Name OR IP 查找 如果存在返回当前id  否则返回null
+            System.out.println(userService.NameOrIPExists(user.getUsername(),getIpAddr(request)));
+            if(userService.NameOrIPExists(user.getUsername(),getIpAddr(request))!=null){
+
+
+                return Response.build(Response.ResponseCode.ERROR,"用户名或IP已经存在");
+
+            }else{
+
+
+                //加密密码 变成密文存进数据库
                 //注意这里，自定义的加密的KEY要和解密的KEY一致，这就是钥匙，如果你上锁了，却忘了钥匙，那么是解密不了的
                 DesUtils des = new DesUtils("leemenz"); //自定义密钥
                 user.setPassword(des.encrypt(user.getPassword()));//加密
 
-            } catch (Exception e) {
-                return 0;
-            }
+
 
                 //如果满足上面的条件会进行插入
                 user.setIPsource(getIpAddr(request));//获取客户端IP
-                user.setJointime(new Date(0));//获取当前时间函数
-                return userService.adduser(user); //成功插入返回1
+                user.setIptity(getIpDescr(getIpAddr(request)));
+                user.setJointime(GetSqlTime());//获取当前sql时间函数
+
+                if(userService.adduser(user)>0){//成功插入返回1
+
+                    return  Response.build(Response.ResponseCode.SUCCESS,"注册成功");
+
+                }else{
+
+                    return  Response.build(Response.ResponseCode.ERROR,"注册失败");
+                }
+
+
+            }
 
         }catch (Exception e){
-           return -2;
+
+
+
+           return Response.build(Response.ResponseCode.ERROR,"网络异常请重试");
         }
 
     }
@@ -80,31 +100,38 @@ public class UserController extends BaseController{
      * @param verify 验证码
      * @return  成功返回ok
      */
-    @RequestMapping("/Log")
-    @ResponseBody
-    public Integer Href(BUsers user,String verify){
+    @PostMapping("/Log")
+    public Object Log(BUsers user,String verify){
 
         try{
 
             RandomValidateCode R = new RandomValidateCode();
             if(!verify.equalsIgnoreCase(session.getAttribute(R.RANDOMCODEKEY).toString())){
 
-                return -1;//验证码错误
+                return Response.build(Response.ResponseCode.ERROR,"验证码错误");//验证码错误
             }
             DesUtils des = new DesUtils("leemenz"); //自定义密钥
-            user.setPassword(des.encrypt(user.getPassword()));//进行解密
-            if(userService.User_id(user)!=null){
-                //把用户名称存进Session，方便前端使用
-                session.setAttribute("u_name",user.getUsername());
+            user.setPassword(des.encrypt(user.getPassword()));//进行加密对比
 
-                return 1;//用户名正确
+            BUsers bUsers = userService.User_login(user);
+            //用户名和密码正确 返回实体类数据
+            if(bUsers!=null){
+
+                //把用户名称存进Session，方便前端使用
+                session.setAttribute("username",user.getUsername());
+
+                List<BUsers> bUsersList = new ArrayList<>();
+
+                bUsersList.add(bUsers);
+
+                return Response.build(Response.ResponseCode.SUCCESS,"登录成功",bUsersList);//用户名正确
             }
             else{
 
-                return 0;//用户名错误
+                return Response.build(Response.ResponseCode.ERROR,"用户名或密码错误");//用户名错误
             }
         }catch (Exception e){
-            return -2;//"遇到未知错误,请重试."
+            return Response.build(Response.ResponseCode.ERROR,"遇到未知错误,请重试");//"遇到未知错误,请重试."
         }
     }
 
@@ -114,7 +141,7 @@ public class UserController extends BaseController{
 
 
 
-    @ResponseBody
+
     @GetMapping("/all")
     public Object findAllUser(
             @RequestParam(name = "pageNum", required = false, defaultValue = "1")
@@ -129,7 +156,7 @@ public class UserController extends BaseController{
     /**
      *  输出验证码
      * @param request   客户端响应头目标源
-     * @param response  将验证码通过
+     * @param response
      */
     @RequestMapping("checkCode")
     public void checkCode(HttpServletRequest  request, HttpServletResponse response) {

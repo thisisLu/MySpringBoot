@@ -4,6 +4,8 @@ package com.example.demo.Util;
 
 import javax.crypto.Cipher;
 import java.security.Key;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -127,11 +129,7 @@ public class DesUtils {
             e.printStackTrace();
         }*/
 
-        java.util.Date date = new Date();
-
-        java.sql.Timestamp sqlDate=new java.sql.Timestamp(date.getTime());
-
-        System.out.println("sqlDate = " + sqlDate);
+        //(1)
 
 
 

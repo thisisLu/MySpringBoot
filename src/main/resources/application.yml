@@ -1,10 +1,9 @@
 server:
-  port: 8080
+  port: 8090
 
 
 spring:
   datasource:
-    name: mysql_activation
     type: com.alibaba.druid.pool.DruidDataSource
     #druid相关配置
     druid:
@@ -13,8 +12,8 @@ spring:
       driver-class-name: com.mysql.jdbc.Driver
       #基本属性
       url: jdbc:mysql://localhost:3306/blog_data?useUnicode=true&characterEncoding=UTF-8&useSSL=false&&serverTimezone=UTC
-      username: root
-      password: root
+      username: blog_data
+      password: yhcMzzdtb5xN5CS8
       #配置初始化大小/最小/最大
       initial-size: 1
       min-idle: 1
@@ -36,20 +35,33 @@ spring:
 
 
 
-
+#Mapper映射地址
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.demo.model
 
 
 
-#pagehelper
+#分页插件
 pagehelper:
   helperDialect: mysql
   reasonable: true
   supportMethodsArguments: true
   params: count=countSql
   returnPageInfo: check
+
+#日记配置
+logging:
+  # 在当前磁盘的根路径下创建spring文件夹和里面的log文件夹
+  path: "/spring/log/"
+  pattern:
+    #输出到控制台
+    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss}}){magenta} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(%25.25logger{25}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+    #指定文件中日志输出的格式
+    file: "%d{yyyy-MM-dd} === [%thread] === %-5level === %logger{50} ==== %msg%n"
+  level:
+    #dao层日志输出控制台
+    com.example.demo: debug
 
 
 
